@@ -29,6 +29,7 @@ namespace DstCompensatedDateTime.Test.Unit
             var utcNow = DateTime.Now.ToString(format);
 
             /* Act */
+            stubTimeNow.CurrentUtc().Returns(DateTime.UtcNow);
             _uut.CurrentTimeUtc();
 
             /* Assert */
