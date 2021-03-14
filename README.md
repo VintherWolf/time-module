@@ -1,3 +1,5 @@
+[![.NET](https://github.com/VintherWolf/time-module/actions/workflows/dotnet.yml/badge.svg)](https://github.com/VintherWolf/time-module/actions/workflows/dotnet.yml)
+
 # Time Module
 C# time module
 
