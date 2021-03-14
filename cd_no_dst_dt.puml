@@ -1,0 +1,80 @@
+@startuml cd_no_dst_dt
+title cd:TimeModule
+
+'==================
+' Interfaces
+'==================
+interface ITimeModule {
+    'Methods
+    + {abstract} CurrentTimeUtc() : void
+    + {abstract} CurrentTimeLocal() : void
+    + {abstract} OffsetTime(DateTime dt, int days, int hours, int minutes) : void
+    + {abstract} ExternalTimeCorrection(DateTime dt) : void
+    + {abstract} FromDateTimeToUnix(DateTime dt) : void
+    + {abstract} FromUnixToDateTime(Int unix) : void
+    + {abstract} ShowDaylightSavingPeriod() : void
+}
+
+'==================
+' Classes
+'==================
+class TimeModule implements ITimeModule {
+    'Fields/Attributes
+    + Timestamp : DateTime {get; set;}
+    + Daylight  : DaylightTime  {get; set;}
+    + LocalZone : TimeZone {get; set;}
+    + CurrentDate : DateTime {get; set;}
+    + CurrentYear : int {get;}
+    + DaylightStart : DateTime { get;}
+    + DaylightEnd : DateTime { get;}
+    + DaylightDelta : TimeSpan { get;}
+
+    'Methods
+    TimeModule()
+    + CurrentTimeUTC() : void
+    + CurrentTimeLocal() : void
+    + OffsetTime(DateTime dt, int days, int hours, int minutes) : void
+    + ExternalTimeCorrection(DateTime dt) : void
+    + FromDateTimeToUnix(DateTime dt) : void
+    + FromUnixToDateTime(Int unix) : void
+    + ShowDaylightSavingPeriod() : void
+    - _compensateNowTimeForDST(DateTime dt) : void
+    - _compensateOffsetTimeForDst(DateTime dt) : void
+}
+
+'==================
+' External Packages
+'==================
+package System {
+
+    class DateTime {
+    + NowUtc() : DateTime
+    + NowLocal() : DateTime
+    + ToLocalTime() : DateTime
+    + Add(TimeSpan offset) : DateTime
+    + IsDayLightSavingTime() : bool
+    }
+
+    class TimeSpan {
+
+    }
+
+    class TimeZone {
+        'Deprecated: TODO replace with TimeZoneInfo
+    }
+
+    class Console {
+       + writeline(string line) : void
+    }
+
+    class DaylightTime {
+    }
+}
+
+'==================
+' Connections
+'==================
+
+TimeModule --> System
+
+@enduml
