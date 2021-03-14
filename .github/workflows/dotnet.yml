@@ -24,8 +24,7 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
-    - name: Test
-    - name: Setup timezone
+    - name: Setup timezone and Test
       # You may pin to the exact commit or the version.
       # uses: zcong1993/setup-timezone@f28e5fb1ca95077c81b67be53bcd1923de2175ed
       uses: zcong1993/setup-timezone@v1.1.1
