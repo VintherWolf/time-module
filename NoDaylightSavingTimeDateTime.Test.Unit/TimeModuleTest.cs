@@ -1,5 +1,7 @@
 using System;
+using DstCompensatedDateTime.Classes.Interface;
 using NUnit.Framework;
+using NSubstitute;
 using TimeModule = DstCompensatedDateTime.Classes.Controller.TimeModule;
 
 namespace DstCompensatedDateTime.Test.Unit
@@ -8,11 +10,13 @@ namespace DstCompensatedDateTime.Test.Unit
     public class TimeModuleTest
     {
         private TimeModule _uut;
+        private ITimeNow stubTimeNow;
 
         [SetUp]
         public void Setup()
         {
-            _uut = new TimeModule();
+            stubTimeNow = Substitute.For<ITimeNow>();
+            _uut = new TimeModule(stubTimeNow);
         }
 
         #region CurrentTimeUtc
@@ -30,6 +34,36 @@ namespace DstCompensatedDateTime.Test.Unit
             /* Assert */
             Assert.That(_uut.Timestamp.ToString(format), Is.EqualTo(utcNow));
         }
+
+        [Test]
+        public void CurrentTimeUtc_UnixEpochIsCorrect()
+        {
+            /* Arrange */
+            var unixEpoch = DateTime.UnixEpoch;
+
+            /* Act */
+            _uut.CurrentTimeUtc();
+
+            /* Assert */
+            Assert.That(_uut.UnixEpoch, Is.EqualTo(unixEpoch));
+        }
+
+        [Test]
+        public void CurrentTimeUtc_UnixTimestampIsCorrect()
+        {
+            /* Arrange */
+            // Epoch + 1700000000s = 14.11.2023 22.13.20 GMT
+            int ExpectedUnixTime = 1700000000;
+            DateTime stubDate = new DateTime(2023, 11, 14, 22, 13, 20, DateTimeKind.Utc);
+
+            /* Act */
+            stubTimeNow.CurrentUtc().Returns(stubDate);
+            _uut.CurrentTimeUtc();
+
+            /* Assert */
+            Assert.That(_uut.TimestampUnix, Is.EqualTo(ExpectedUnixTime));
+        }
+
         #endregion CurrentTimeUtc
 
         #region CurrentTimeLocal
@@ -158,12 +192,41 @@ namespace DstCompensatedDateTime.Test.Unit
 
         #region FromUnixToDateTime
 
+        [Test]
+        public void FromDateTimeToUnix_ValidUnixTime_TimestampIsCorrect()
+        {
+            /* Arrange */
+            // Epoch + 1700000000s = 14.11.2023 23.13.20 Local Time
+            int stubUnixTime = 1700000000;
+            DateTime expectedDate = new DateTime(2023, 11, 14, 23, 13, 20, DateTimeKind.Utc);
+
+            /* Act */
+            _uut.FromUnixToDateTime(stubUnixTime);
+
+            /* Assert */
+            Assert.That(_uut.Timestamp, Is.EqualTo(expectedDate));
+        }
+
         #endregion FromUnixToDateTime
 
-        #region FromDateimeToUnix
+        #region FromDateTimeToUnix
 
+        [Test]
+        public void FromDateTimeToUnix_ValidDateTime_TimestampUnixIsCorrect()
+        {
+            /* Arrange */
+            // Epoch + 1700000000s = 14.11.2023 22.13.20 GMT
+            int ExpectedUnixTime = 1700000000;
+            DateTime stubDate = new DateTime(2023, 11, 14, 22, 13, 20, DateTimeKind.Utc);
 
-        #endregion FromDateimeToUnix
+            /* Act */
+            _uut.FromDateTimeToUnix(stubDate);
+
+            /* Assert */
+            Assert.That(_uut.TimestampUnix, Is.EqualTo(ExpectedUnixTime));
+        }
+
+        #endregion FromDateTimeToUnix
 
     }
 }

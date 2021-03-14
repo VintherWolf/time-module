@@ -5,7 +5,6 @@ title cd:TimeModule
 ' Interfaces
 '==================
 interface ITimeModule {
-    'Methods
     + {abstract} CurrentTimeUtc() : void
     + {abstract} CurrentTimeLocal() : void
     + {abstract} OffsetTime(DateTime dt, int days, int hours, int minutes) : void
@@ -15,22 +14,31 @@ interface ITimeModule {
     + {abstract} ShowDaylightSavingPeriod() : void
 }
 
+interface ITimeNow {
+    + {abstract} CurrentUtc() : DateTime
+    + {abstract} CurrentLocal() : DateTime
+}
+
 '==================
 ' Classes
 '==================
 class TimeModule implements ITimeModule {
+    'Instances
+    - _timeNow : ITimeNow
     'Fields/Attributes
     + Timestamp : DateTime {get; set;}
+    + TimestampUnix : int {get;}
     + Daylight  : DaylightTime  {get; set;}
     + LocalZone : TimeZone {get; set;}
     + CurrentDate : DateTime {get; set;}
     + CurrentYear : int {get;}
-    + DaylightStart : DateTime { get;}
-    + DaylightEnd : DateTime { get;}
-    + DaylightDelta : TimeSpan { get;}
+    + DaylightStart : DateTime {get;}
+    + DaylightEnd : DateTime {get;}
+    + DaylightDelta : TimeSpan {get;}
+    + UnixEpoch : DateTime {get;}
 
     'Methods
-    TimeModule()
+    TimeModule(ITimeNow tm)
     + CurrentTimeUTC() : void
     + CurrentTimeLocal() : void
     + OffsetTime(DateTime dt, int days, int hours, int minutes) : void
@@ -38,8 +46,14 @@ class TimeModule implements ITimeModule {
     + FromDateTimeToUnix(DateTime dt) : void
     + FromUnixToDateTime(Int unix) : void
     + ShowDaylightSavingPeriod() : void
-    - _compensateNowTimeForDST(DateTime dt) : void
-    - _compensateOffsetTimeForDst(DateTime dt) : void
+    - _convertToLocalTime(DateTime dt) : void
+    - _compensateForTimeChangeDueToDst(DateTime dt) : void
+}
+
+class TimeNow implements ITimeNow {
+    'Methods
+    + CurrentUtc() : DateTime
+    + CurrentLocal() : DateTime
 }
 
 '==================
@@ -76,5 +90,6 @@ package System {
 '==================
 
 TimeModule --> System
+TimeModule <|-- TimeNow
 
 @enduml

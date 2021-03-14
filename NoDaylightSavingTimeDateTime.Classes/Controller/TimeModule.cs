@@ -7,6 +7,8 @@ namespace DstCompensatedDateTime.Classes.Controller
     public class TimeModule : ITimeModule
     {
         public DateTime Timestamp { get; set; }
+        public DateTime UnixEpoch { get; }
+        public int TimestampUnix { get; set;}
         public DaylightTime Daylight { get; set; }
         public TimeZone LocalZone { get; set; }
         public DateTime CurrentDate { get; set; }
@@ -14,9 +16,12 @@ namespace DstCompensatedDateTime.Classes.Controller
         public DateTime DaylightStart { get;}
         public DateTime DaylightEnd { get; }
         public TimeSpan DaylightDelta { get; }
+
+        private ITimeNow _myTimeNow;
         
-        public TimeModule()
+        public TimeModule(ITimeNow timeNow)
         {
+            _myTimeNow = timeNow;
             LocalZone = TimeZone.CurrentTimeZone;
             CurrentDate = DateTime.Now;
             CurrentYear = CurrentDate.Year;
@@ -24,14 +29,17 @@ namespace DstCompensatedDateTime.Classes.Controller
             DaylightStart = Daylight.Start;
             DaylightEnd = Daylight.End;
             DaylightDelta = Daylight.Delta;
+            UnixEpoch = DateTime.UnixEpoch;
+            this.CurrentTimeUtc();
         }
 
 
         public void CurrentTimeUtc()
         {
-            DateTime utcNow = DateTime.UtcNow;
-
-            _compensateNowTimeForDst(utcNow);
+            DateTime utcNow = _myTimeNow.CurrentUtc();
+            TimeSpan unixNow = utcNow - UnixEpoch;
+            TimestampUnix = (int)unixNow.TotalSeconds;
+            _convertToLocalTime(utcNow);
         }
 
         public void CurrentTimeLocal()
@@ -44,15 +52,15 @@ namespace DstCompensatedDateTime.Classes.Controller
             var Offset = new TimeSpan(days, hours, minutes, 0);
             DateTime timeAfter = Timestamp.Add(Offset);
             
-            _compensateOffsetTimeForDst(timeAfter);
+            _compensateForTimeChangeDueToDst(timeAfter);
         }
 
         public void ExternalTimeCorrection(DateTime dt)
         {
-            _compensateOffsetTimeForDst(dt);
+            _compensateForTimeChangeDueToDst(dt);
         }
 
-        private void _compensateOffsetTimeForDst(DateTime timeAfter)
+        private void _compensateForTimeChangeDueToDst(DateTime timeAfter)
         {
             var timeDifference = timeAfter.Hour - Timestamp.Hour;
 
@@ -79,7 +87,7 @@ namespace DstCompensatedDateTime.Classes.Controller
             }
         }
 
-        private void _compensateNowTimeForDst(DateTime dt)
+        private void _convertToLocalTime(DateTime dt)
         {
             int summerTime = 2;
             int winterTime = 1;
@@ -110,12 +118,15 @@ namespace DstCompensatedDateTime.Classes.Controller
 
         public void FromUnixToDateTime(int unix)
         {
-            throw new NotImplementedException();
+            DateTime rawUtcTimestamp = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                .AddSeconds(unix);
+
+            _convertToLocalTime(rawUtcTimestamp);
         }
 
-        public void FromDateimeToUnix(DateTime dt)
+        public void FromDateTimeToUnix(DateTime dt)
         {
-            throw new NotImplementedException();
+            
         }
     }
 }
