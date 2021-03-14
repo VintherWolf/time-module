@@ -12,11 +12,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: setTimeZone
-      env:
-        TZ=Europe/Copenhagen
-      run: ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && dpkg-reconfigure -f noninteractive tzdata
     - uses: actions/checkout@v2
+      with:
+        timezone: Europe/Copenhagen
     - name: Setup .NET
       uses: actions/setup-dotnet@v1
       with:
