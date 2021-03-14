@@ -211,8 +211,9 @@ namespace DstCompensatedDateTime.Test.Unit
         #endregion FromUnixToDateTime
 
         #region FromDateTimeToUnix
-
+        
         [Test]
+        [Ignore("TBD")]
         public void FromDateTimeToUnix_ValidDateTime_TimestampUnixIsCorrect()
         {
             /* Arrange */
