@@ -24,11 +24,12 @@ jobs:
       run: dotnet restore
     - name: Build
       run: dotnet build --no-restore
-    - name: Setup timezone and Test
+    - name: Setup timezone
       # You may pin to the exact commit or the version.
       # uses: zcong1993/setup-timezone@f28e5fb1ca95077c81b67be53bcd1923de2175ed
       uses: zcong1993/setup-timezone@v1.1.1
       with:
         # which timezone you want to use
         timezone: Europe/Copenhagen
+    - name: Test
       run: dotnet test --no-build --verbosity normal
